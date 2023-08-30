@@ -6,13 +6,14 @@ from marshmallow.fields import String
 from marshmallow import ValidationError
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from flask_cors import CORS
+import os
 
 # Crea una instancia de la aplicación Flask
 app = Flask(__name__)
 
-# Configura la URL de la base de datos PostgreSQL
-# Cambia la URL para que coincida con tu configuración de PgAdmin
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://emilio.vieira:arbodicolas@localhost/most_wanted'
+# Configura la URL de la base de datos SQLite en el directorio actual
+db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'database.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 
 # Crea una instancia de la base de datos SQLAlchemy y de Marshmallow
 db = SQLAlchemy(app)
@@ -112,6 +113,10 @@ def delete_persona(id):
     db.session.commit()
     # Devuelve un mensaje de éxito
     return jsonify({"mensaje": "Persona eliminada exitosamente"})
+
+# Crea las tablas en el contexto de la aplicación Flask
+with app.app_context():
+    db.create_all()
 
 # Ejecuta la aplicación Flask en modo de depuración
 if __name__ == '__main__':
